@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLAYER 1 - 網頁開發闖關作品集</title>
-    <!-- Pixel Font from Google Fonts -->
+    <title>PLAYER 1 - 餅乾勇士的網頁開發冒險作品集</title>
+    <!-- 引入可愛圓潤與遊戲感字體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
+        /* =========================================================
+           1. 薑餅人王國主題色彩與全域變數 (Cookie Run Palette)
+           ========================================================= */
         :root {
-            --mario-sky: #5c94fc;
-            --mario-ground: #00a800;
-            --mario-brick: #b84418;
-            --mario-gold: #f8d800;
-            --mario-coin: #f8a000;
-            --mario-pipe: #00a800;
-            --mario-dark-pipe: #006800;
-            --mario-cloud: #ffffff;
-            --mario-black: #000000;
-            --pixel-border-color: #000;
+            --ginger-bg: #FFF5E4;         /* 暖白麵粉背景 */
+            --ginger-crust: #C68B59;      /* 薑餅香烤主色 */
+            --ginger-dark: #8B4513;       /* 濃郁巧克力棕 */
+            --ginger-light: #FFC069;      /* 奶油金黃色 */
+            --icing-white: #FFFFFF;       /* 糖霜純白 */
+            --candy-red: #FF4D6D;         /* 草莓糖漿紅 */
+            --matcha-green: #52B788;      /* 抹茶草地綠 */
+            --crystal-blue: #4EA8DE;      /* 水晶糖果藍 */
+            --text-cookie: #4A2810;       /* 餅乾主要文字（深焦糖） */
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
         }
 
         * {
@@ -27,597 +31,40 @@
             margin: 0;
             padding: 0;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Press Start 2P', 'VT323', monospace, cursive;
-            background-color: var(--mario-sky);
-            color: #ffffff;
+            font-family: 'Fredoka', 'Zen Maru Gothic', sans-serif;
+            background-color: var(--ginger-bg);
+            /* 糖果點點背景圖案 */
+            background-image: 
+                radial-gradient(#FFE3BB 18%, transparent 18%),
+                radial-gradient(#FFE3BB 18%, transparent 18%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            color: var(--text-cookie);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
+            padding: 20px 16px 40px;
             position: relative;
-            overflow-x: hidden;
-            background-image:
-                radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.8) 15px, transparent 15px),
-                radial-gradient(circle at 85% 25%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.8) 22px, transparent 22px);
         }
 
-        /* Classic Nes Pixel Box Border */
-        .nes-border {
-            position: relative;
-            background-color: #212529;
-            border: 4px solid #000;
-            box-shadow:
-                -4px 0 #000,
-                4px 0 #000,
-                0 -4px #000,
-                0 4px #000,
-                inset -4px -4px rgba(0,0,0,0.4);
-        }
-
-        .gold-border {
-            border-color: var(--mario-black);
-            background: #e79c10;
-            box-shadow:
-                0 6px 0 #8d5000,
-                0 -6px 0 #fce072,
-                6px 0 0 #fce072,
-                -6px 0 0 #8d5000,
-                0 0 0 4px #000;
-        }
-
-        /* HUD Header */
+        /* =========================================================
+           2. HUD 遊戲頂列資源列 (Resources Bar)
+           ========================================================= */
         .hud-bar {
             width: 100%;
             max-width: 960px;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: center;
-            padding: 12px 20px;
-            margin-bottom: 25px;
-            background-color: rgba(0, 0, 0, 0.75);
-            border-radius: 4px;
-            font-size: 12px;
-            color: #fff;
-            text-shadow: 2px 2px #000;
-            z-index: 10;
-        }
-
-        .hud-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .hud-label {
-            color: #e76e55;
-            font-size: 10px;
-        }
-
-        .hud-value {
-            color: #fff;
-            letter-spacing: 1px;
-        }
-
-        .coin-icon {
-            display: inline-block;
-            width: 12px;
-            height: 14px;
-            background-color: var(--mario-gold);
-            border: 2px solid #000;
-            border-radius: 3px;
-            animation: coinSpin 1.2s steps(4) infinite;
-        }
-
-        @keyframes coinSpin {
-            0% { transform: scaleX(1); }
-            50% { transform: scaleX(0.2); }
-            100% { transform: scaleX(1); }
-        }
-
-        /* Profile Hero Section */
-        .profile-card {
-            width: 100%;
-            max-width: 960px;
-            background-color: #f8f8f8;
-            color: #000;
-            padding: 24px;
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 16px;
-            border: 4px solid #000;
-            box-shadow: 6px 6px 0px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .avatar-container {
-            position: relative;
-            width: 110px;
-            height: 110px;
-            background: var(--mario-sky);
-            border: 4px solid #000;
-            padding: 4px;
-            margin-bottom: 8px;
-        }
-
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            image-rendering: pixelated;
-        }
-
-        .player-title {
-            font-size: 18px;
-            color: var(--mario-brick);
-            text-shadow: 2px 2px 0px #fce072;
-            line-height: 1.4;
-        }
-
-        .player-subtitle {
-            font-size: 11px;
-            color: #555;
-            line-height: 1.6;
-            margin-top: 4px;
-        }
-
-        /* Stage Select Title */
-        .section-title {
-            width: 100%;
-            max-width: 960px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 16px;
-            color: #fff;
-            text-shadow: 3px 3px 0 #000;
-        }
-
-        .star-icon {
-            font-size: 20px;
-            animation: blink 0.8s infinite alternate;
-        }
-
-        @keyframes blink {
-            from { opacity: 0.4; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1.1); }
-        }
-
-        /* Grid Layout (4x4 Desktop, 2x8 Tablet, 1x16 Mobile) */
-        .stage-grid {
-            width: 100%;
-            max-width: 960px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 40px;
-        }
-
-        /* Stage Card Base */
-        .stage-card {
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 120px;
-            padding: 14px;
-            position: relative;
-            border: 4px solid #000;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #000;
-            border-radius: 2px;
-        }
-
-        /* Unlocked Card Style */
-        .stage-card.unlocked {
-            background-color: var(--mario-gold);
-            color: #000;
-        }
-
-        .stage-card.unlocked:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 11px 0 #000;
-            background-color: #ffea63;
-        }
-
-        .stage-card.unlocked:active {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 0 #000;
-        }
-
-        /* Locked Card Style */
-        .stage-card.locked {
-            background-color: #7c7c7c;
-            color: #d0d0d0;
-            cursor: not-allowed;
-            border-color: #333;
-            box-shadow: 0 5px 0 #222;
-        }
-
-        .stage-card.locked:hover {
-            animation: shake 0.3s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-4px); }
-            40% { transform: translateX(4px); }
-            60% { transform: translateX(-2px); }
-            80% { transform: translateX(2px); }
-        }
-
-        .stage-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .stage-badge {
-            padding: 2px 6px;
-            font-size: 8px;
-            border-radius: 2px;
-            border: 2px solid #000;
-        }
-
-        .unlocked .stage-badge {
-            background-color: #00a800;
-            color: #fff;
-        }
-
-        .locked .stage-badge {
-            background-color: #444;
-            color: #aaa;
-            border-color: #222;
-        }
-
-        .stage-title {
-            font-size: 12px;
-            margin-top: 10px;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .unlocked .stage-title {
-            color: #222;
-        }
-
-        .locked .stage-title {
-            color: #bbb;
-        }
-
-        .lock-icon {
-            font-size: 18px;
-            margin-right: 4px;
-        }
-
-        /* Toast Notification for Locked Buttons */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background-color: #e74c3c;
-            color: white;
-            padding: 12px 24px;
-            border: 4px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            font-size: 12px;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 100;
-            text-align: center;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        /* CRT Overlay Filter */
-        .crt-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%,
-                rgba(0, 0, 0, 0.15) 50%
-            );
-            background-size: 100% 4px;
-            z-index: 99;
-            pointer-events: none;
-            opacity: 0.6;
-        }
-
-        /* Toggle CRT Button */
-        .crt-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #000;
-            color: #fff;
-            border: 2px solid #fff;
-            padding: 6px 10px;
-            font-family: inherit;
-            font-size: 8px;
-            cursor: pointer;
-            z-index: 101;
-        }
-
-        .crt-toggle:hover {
-            background: var(--mario-gold);
-            color: #000;
-        }
-
-        /* Responsive Breakpoints */
-        @media (max-width: 860px) {
-            .stage-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            .stage-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .hud-bar {
-                font-size: 9px;
-                padding: 10px 10px;
-            }
-            .player-title {
-                font-size: 14px;
-            }
-            .stage-title {
-                font-size: 11px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- CRT Scanline Effect -->
-    <div class="crt-overlay" id="crtOverlay"></div>
-    <button class="crt-toggle" id="crtToggle" onclick="toggleCRT()">CRT: ON</button>
-
-    <!-- HUD Header Bar -->
-    <div class="hud-bar nes-border">
-        <div class="hud-item">
-            <span class="hud-label">MARIO</span>
-            <span class="hud-value">000000</span>
-        </div>
-        <div class="hud-item">
-            <span class="hud-label">COINS</span>
-            <span class="hud-value"><span class="coin-icon"></span> x02</span>
-        </div>
-        <div class="hud-item">
-            <span class="hud-label">WORLD</span>
-            <span class="hud-value">1-1</span>
-        </div>
-        <div class="hud-item">
-            <span class="hud-label">PROGRESS</span>
-            <span class="hud-value">02/16</span>
-        </div>
-    </div>
-
-    <!-- Main Profile Card -->
-    <div class="profile-card">
-        <div class="avatar-container">
-            <!-- Retro Pixel Mario Avatar Placeholder -->
-            <img class="avatar-img" src="https://placehold.co/100x100/e76e55/ffffff?text=P1" alt="Player Avatar" onerror="this.src='https://placehold.co/100x100/333/fff?text=P1'">
-        </div>
-        <div>
-            <h1 class="player-title">PLAYER 1: 網頁開發闖關之旅</h1>
-            <p class="player-subtitle">歡迎來到我的 Web 程式設計作品集！挑戰解鎖全 16 個課程關卡卡牌。</p>
-        </div>
-    </div>
-
-    <!-- Stage Select Header -->
-    <div class="section-title">
-        <span class="star-icon">★</span>
-        <span>SELECT STAGE</span>
-        <span class="star-icon">★</span>
-    </div>
-
-    <!-- 16 Stage Buttons Grid -->
-    <div class="stage-grid">
-
-        <!-- Stage 1 (Unlocked) -->
-        <a href="w1/index.html" class="stage-card unlocked">
-            <div class="stage-header">
-                <span>STAGE 01</span>
-                <span class="stage-badge">CLEAR!</span>
-            </div>
-            <div class="stage-title">Week 1 - 數位名片</div>
-        </a>
-
-        <!-- Stage 2 (Unlocked) -->
-        <a href="w2/index.html" class="stage-card unlocked">
-            <div class="stage-header">
-                <span>STAGE 02</span>
-                <span class="stage-badge">CLEAR!</span>
-            </div>
-            <div class="stage-title">Week 2 - 今天吃甚麼?</div>
-        </a>
-
-        <!-- Stage 3 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(3)">
-            <div class="stage-header">
-                <span>STAGE 03</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 3 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 4 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(4)">
-            <div class="stage-header">
-                <span>STAGE 04</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 4 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 5 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(5)">
-            <div class="stage-header">
-                <span>STAGE 05</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 5 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 6 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(6)">
-            <div class="stage-header">
-                <span>STAGE 06</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 6 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 7 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(7)">
-            <div class="stage-header">
-                <span>STAGE 07</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 7 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 8 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(8)">
-            <div class="stage-header">
-                <span>STAGE 08</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 8 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 9 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(9)">
-            <div class="stage-header">
-                <span>STAGE 09</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 9 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 10 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(10)">
-            <div class="stage-header">
-                <span>STAGE 10</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 10 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 11 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(11)">
-            <div class="stage-header">
-                <span>STAGE 11</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 11 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 12 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(12)">
-            <div class="stage-header">
-                <span>STAGE 12</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 12 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 13 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(13)">
-            <div class="stage-header">
-                <span>STAGE 13</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 13 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 14 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(14)">
-            <div class="stage-header">
-                <span>STAGE 14</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 14 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 15 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(15)">
-            <div class="stage-header">
-                <span>STAGE 15</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 15 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 16 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(16)">
-            <div class="stage-header">
-                <span>STAGE 16</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>LOCKED</span>
-            </div>
-            <div class="stage-title">Week 16 - 尚未解鎖</div>
-        </a>
-
-    </div>
-
-    <!-- Locked Stage Alert Toast -->
-    <div id="toast" class="toast">🔒 關卡尚未解鎖！請先完成前面的任務。</div>
-
-    <script>
-        let toastTimeout;
-
-        // Function to trigger locked toast notification
-        function showLockedMessage(weekNum) {
-            const toast = document.getElementById('toast');
-            toast.innerText = `🔒 STAGE ${weekNum} 尚未解鎖！繼續努力學習吧！`;
-            toast.classList.add('show');
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
-        }
-
-        // CRT Filter Toggle Logic
-        function toggleCRT() {
-            const overlay = document.getElementById('crtOverlay');
-            const btn = document.getElementById('crtToggle');
-
-            if (overlay.style.display === 'none') {
-                overlay.style.display = 'block';
-                btn.innerText = 'CRT: ON';
-            } else {
-                overlay.style.display = 'none';
-                btn.innerText = 'CRT: OFF';
-            }
-        }
-    </script>
-</body>
-</html>
-
-     
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            background-color: #5C3D2E;
+            border: 4px solid #3D2314;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 8px 0 #2A160A, inset 0 3px 0 rgba(255,255,255,0.2);
+            font
