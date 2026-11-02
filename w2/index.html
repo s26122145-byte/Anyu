@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陳安楀 - 餅乾勇士的網頁開發冒險作品集</title>
+    <!-- Google 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Kiwi+Maru:wght@400;500&family=Mochiy+Pop+One&family=Noto+Sans+TC:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome 圖示庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* =========================================================
+           1. 全域變數與重設 (Cookie Run & Avocado & Creamy Colors)
+           ========================================================= */
+        :root {
+            /* 薑餅人王國主題色 */
+            --ginger-bg: #FFF5E4;
+            --ginger-crust: #C68B59;
+            --ginger-dark: #8B4513;
+            --ginger-light: #FFC069;
+            --icing-white: #FFFFFF;
+            --candy-red: #FF4D6D;
+            --matcha-green: #52B788;
+            --crystal-blue: #4EA8DE;
+            --text-cookie: #4A2810;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+
+            /* 酪梨綠主題色 (名片用) */
+            --avocado-main: #84a98c; 
+            --avocado-dark: #52796f; 
+            --avocado-light: #e8f0ec;
+            --text-primary: #2b3a30;
+            --text-secondary: #5a7065;
+            --soft-shadow: 0 16px 36px rgba(132, 169, 140, 0.25);
+
+            /* 奶油留言板主題色 */
+            --board-bg: #FFFDF7;
+            --board-card-bg: #FFFFFF;
+            --board-primary: #E29578;
+            --board-accent: #FFDDD2;
+            --board-text-main: #5C4D4D;
+            --board-text-sub: #A39391;
+            --board-highlight-border: #FFB5A7;
+            --board-highlight-shadow: rgba(255, 181, 167, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', 'Zen Maru Gothic', sans-serif;
+            background-color: var(--ginger-bg);
+            background-image: 
+                radial-gradient(#FFE3BB 18%, transparent 18%),
+                radial-gradient(#FFE3BB 18%, transparent 18%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            color: var(--text-cookie);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 16px 40px;
+            position: relative;
+        }
+
+        /* =========================================================
+           2. HUD 遊戲資源頂列
+           ========================================================= */
+        .hud-bar {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            background-color: #5C3D2E;
+            border: 4px solid #3D2314;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 8px 0 #2A160A, inset 0 3px 0 rgba(255,255,255,0.2);
+            font-size: 14px;
+            color: #FFF;
+            z-index: 10;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .hud-icon { font-size: 18px; display: inline-block; }
+        .hud-label { color: #FFD93D; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+        .hud-value { color: #FFF; font-weight: 700; }
+        .crystal-anim { animation: crystalGlow 1.5s infinite alternate; }
+
+        @keyframes crystalGlow {
+            from { transform: scale(1); filter: drop-shadow(0 0 2px #4EA8DE); }
+            to { transform: scale(1.15); filter: drop-shadow(0 0 8px #90E0EF); }
+        }
+
+        /* =========================================================
+           3. 個人Hero區塊
+           ========================================================= */
+        .profile-card {
+            width: 100%;
+            max-width: 960px;
+            background: linear-gradient(135deg, #FFF9F2 0%, #FFEFC8 100%);
+            border: 4px solid var(--ginger-dark);
+            border-radius: var(--border-radius-lg);
+            padding: 24px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            box-shadow: 0 10px 0 var(--ginger-dark), 0 15px 20px rgba(74, 40, 16, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 12px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--icing-white),
+                var(--icing-white) 15px,
+                var(--candy-red) 15px,
+                var(--candy-red) 30px
+            );
+            border-bottom: 3px solid var(--ginger-dark);
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            background: #FFD97D;
+            border: 4px solid var(--ginger-dark);
+            border-radius: 50%;
+            padding: 4px;
+            margin-top: 10px;
+            box-shadow: inset 0 -5px 0 rgba(0,0,0,0.1), 0 6px 0 rgba(0,0,0,0.1);
+        }
+
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .player-title { font-family: 'Mochiy Pop One', 'Zen Maru Gothic', sans-serif; font-size: 22px; color: var(--ginger-dark); text-shadow: 2px 2px 0px #FFF; }
+        .player-subtitle { font-size: 14px; color: #7A5230; line-height: 1.6; margin-top: 4px; font-weight: 500; }
+
+        /* =========================================================
+           4. 關卡選擇區標題
+           ========================================================= */
+        .section-title {
+            width: 100%; max-width: 960px; margin-bottom: 24px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-family: 'Mochiy Pop One', sans-serif; font-size: 20px; color: var(--ginger-dark);
+            text-shadow: 2px 2px 0 #FFF, 4px 4px 0 rgba(0,0,0,0.1);
+        }
+
+        .candy-star { font-size: 24px; animation: bounceStar 1s infinite alternate ease-in-out; }
+        @keyframes bounceStar {
+            from { transform: translateY(0) rotate(-10deg); }
+            to { transform: translateY(-6px) rotate(10deg); }
+        }
+
+        /* =========================================================
+           5. 16 關卡網格卡片
+           ========================================================= */
+        .stage-grid {
+            width: 100%;
+            max-width: 960px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stage-card {
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 135px;
+            padding: 16px;
+            position: relative;
+            border-radius: var(--border-radius-md);
+            border: 4px solid var(--ginger-dark);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .stage-card.unlocked {
+            background: linear-gradient(180deg, #FFDD83 0%, #E8A752 100%);
+            box-shadow: 0 8px 0 var(--ginger-dark), 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        .stage-card.unlocked:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 14px 0 var(--ginger-dark), 0 16px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(180deg, #FFE89C 0%, #F5B865 100%);
+        }
+
+        .stage-card.unlocked:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 var(--ginger-dark);
+        }
+
+        .stage-card.locked {
+            background: linear-gradient(180deg, #9C8375 0%, #685044 100%);
+            border-color: #3D2B22;
+            cursor: not-allowed;
+            box-shadow: 0 6px 0 #2A1C16;
+            opacity: 0.9;
+        }
+
+        .stage-card.locked:hover { animation: cookieShake 0.4s ease-in-out; }
+        @keyframes cookieShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+
+        .stage-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; }
+        .stage-number { color: var(--ginger-dark); letter-spacing: 0.5px; }
+        .locked .stage-number { color: #E2D4C9; }
+        .stage-badge { padding: 3px 8px; font-size: 10px; font-weight: 800; border-radius: 12px; border: 2px solid var(--ginger-dark); }
+        .unlocked .stage-badge { background-color: var(--matcha-green); color: #FFF; box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+        .locked .stage-badge { background-color: #4A352B; color: #C2B2A3; border-color: #2A1C16; }
+        .stage-title { font-size: 13px; font-weight: 700; margin-top: 12px; line-height: 1.4; word-break: break-word; }
+        .unlocked .stage-title { color: var(--ginger-dark); text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+        .locked .stage-title { color: #D3C4B7; }
+        .lock-icon { font-size: 14px; margin-right: 2px; }
+
+        /* =========================================================
+           6. 通用 Modal 彈窗基礎
+           ========================================================= */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(42, 22, 10, 0.75); backdrop-filter: blur(6px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 20px;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-wrapper { position: relative; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-wrapper { transform: scale(1); }
+        .modal-close-btn {
+            position: absolute; top: -12px; right: -12px; width: 40px; height: 40px;
+            background: var(--candy-red); border: 3px solid var(--ginger-dark); color: white;
+            border-radius: 50%; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 0 var(--ginger-dark); z-index: 20; transition: transform 0.2s;
+        }
+        .modal-close-btn:hover { transform: scale(1.1); }
+
+        /* STAGE 01 名片樣式 */
+        .card-container {
+            background: #FFFFFF; backdrop-filter: blur(12px); width: 100%; max-width: 350px;
+            padding: 40px 28px; border-radius: 28px; text-align: center; border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: var(--soft-shadow), 0 10px 0 var(--ginger-dark); user-select: text; margin: 0 auto;
+        }
+        .card-container .avatar-wrapper {
+            width: 110px; height: 110px; margin: 0 auto 20px; border-radius: 50%; padding: 4px;
+            background: linear-gradient(135deg, var(--avocado-main), #ffffff); box-shadow: 0 8px 20px rgba(132, 169, 140, 0.3);
+        }
+        .card-container .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+        .card-container .name { font-size: 25px; font-weight: 700; color: var(--text-primary); letter-spacing: 1px; margin-bottom: 12px; }
+        .card-container .bio { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 28px; background-color: var(--avocado-light); padding: 10px 16px; border-radius: 14px; text-align: left; }
+        .card-container .button-group { display: flex; flex-direction: column; gap: 14px; }
+        .card-container .btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 13px 20px; border-radius: 16px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.25s ease; }
+        .card-container .btn-instagram { background-color: #ffffff; color: var(--avocado-dark); border: 2px solid var(--avocado-main); box-shadow: 0 4px 12px rgba(132, 169, 140, 0.15); }
+        .card-container .btn-instagram:hover { background-color: var(--avocado-light); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(132, 169, 140, 0.3); }
+        .card-container .btn-email { background-color: var(--avocado-main); color: #ffffff; box-shadow: 0 4px 14px rgba(132, 169, 140, 0.4); }
+        .card-container .btn-email:hover { background-color: var(--avocado-dark); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(82, 121, 111, 0.35); }
+
+        /* STAGE 02 留言板 Modal 特殊樣式 */
+        .board-modal-wrapper {
+            background-color: var(--board-bg);
+            border-radius: var(--border-radius-lg);
+            border: 4px solid var(--ginger-dark);
+            padding: 30px 24px;
+            width: 90vw;
+            max-width: 1000px;
+            box-shadow: 0 12px 0 var(--ginger-dark);
+            user-select: text;
+        }
+
+        .board-header { text-align: center; margin-bottom: 30px; }
+        .board-header h2 { font-size: 1.8rem; color: var(--board-primary); margin-bottom: 6px; }
+        .board-header p { font-size: 0.95rem; color: var(--board-text-sub); }
+
+        /* Q彈 Loading 動畫 */
+        #loading { display: flex; flex-direction: column; align-items: center; margin: 40px 0; }
+        .loader-dots { display: flex; gap: 12px; margin-bottom: 12px; }
+        .loader-dots div { width: 16px; height: 16px; background-color: var(--board-primary); border-radius: 50%; animation: bounce 0.6s infinite alternate; }
+        .loader-dots div:nth-child(2) { animation-delay: 0.2s; background-color: var(--board-highlight-border); }
+        .loader-dots div:nth-child(3) { animation-delay: 0.4s; background-color: var(--board-accent); }
+        @keyframes bounce { to { transform: translateY(-14px) scale(1.1); } }
+
+        /* 留言板瀑布流與卡片特效 */
+        .wall-container { column-count: 3; column-gap: 20px; width: 100%; }
+        @media (max-width: 800px) { .wall-container { column-count: 2; } }
+        @media (max-width: 500px) { .wall-container { column-count: 1; } }
+
+        .board-card {
+            background-color: var(--board-card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            break-inside: avoid;
+            border: 2px solid #F7F0E6;
+            box-shadow: 0 6px 16px rgba(226, 149, 120, 0.08);
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+        }
+
+        .board-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .board-avatar { width: 34px; height: 34px; border-radius: 50%; background-color: var(--board-accent); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .board-author { font-weight: 700; font-size: 1rem; color: var(--board-text-main); }
+        .board-content { font-size: 0.92rem; line-height: 1.6; color: var(--board-text-main); white-space: pre-wrap; word-break: break-word; }
+        .board-time { margin-top: 12px; font-size: 0.75rem; color: var(--board-text-sub); text-align: right; }
+
+        /* 高亮選中與發光的 CSS 樣式 */
+        .board-card.highlight {
+            transform: scale(1.05);
+            border-color: var(--board-highlight-border);
+            box-shadow: 0 10px 25px var(--board-highlight-shadow);
+            opacity: 1 !important;
+            filter: blur(0px) !important;
+            z-index: 10;
+        }
+        .wall-container.has-highlight .board-card:not(.highlight) {
+            opacity: 0.45;
+            filter: blur(1.5px);
+            transform: scale(0.98);
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background-color: var(--candy-red); color: white; padding: 14px 28px; border: 4px solid var(--ginger-dark);
+            border-radius: 30px; box-shadow: 0 8px 0 var(--ginger-dark), 0 10px 20px rgba(0,0,0,0.2);
+            font-size: 13px; font-weight: 700; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            opacity: 0; pointer-events: none; z-index: 200; text-align: center; display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        @media (max-width: 860px) { .stage-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) {
+            body { padding: 12px 10px 30px; }
+            .stage-grid { grid-template-columns: 1fr; gap: 14px; }
+            .hud-bar { font-size: 11px; padding: 10px 8px; }
+            .hud-item { padding: 4px 8px; }
+            .player-title { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD 資源列 -->
+    <div class="hud-bar">
+        <div class="hud-item"><span class="hud-icon">🥐</span><div><div class="hud-label">EXP FLOUR</div><div class="hud-value">9,999</div></div></div>
+        <div class="hud-item"><span class="hud-icon crystal-anim">💎</span><div><div class="hud-label">CRYSTALS</div><div class="hud-value">3,200</div></div></div>
+        <div class="hud-item"><span class="hud-icon">🌿</span><div><div class="hud-label">VANILLA</div><div class="hud-value">WORLD 1</div></div></div>
+        <div class="hud-item"><span class="hud-icon">🏆</span><div><div class="hud-label">CLEAR</div><div class="hud-value">03/16</div></div></div>
+    </div>
+
+    <!-- 個人Hero區塊 -->
+    <div class="profile-card">
+        <div class="avatar-container">
+            <img class="avatar-img" src="https://i.postimg.cc/Px1Xb82t/UU.jpg" alt="陳安楀的大頭照" onerror="this.src='https://placehold.co/100x100/8B4513/FFF?text=UU'">
+        </div>
+        <div>
+            <h1 class="player-title">🍪 陳安楀的 Web 冒險記</h1>
+            <p class="player-subtitle">歡迎來到我的網頁開發冒險地圖！點擊已解鎖的關卡查看作品內容！</p>
+        </div>
+    </div>
+
+    <!-- 關卡選擇區 Header -->
+    <div class="section-title">
+        <span class="candy-star">⭐</span>
+        <span>SELECT STAGE</span>
+        <span class="candy-star">⭐</span>
+    </div>
+
+    <!-- 16 關卡薑餅卡片牆 -->
+    <div class="stage-grid">
+        <!-- Stage 1 (已解鎖 - 名片 Modal) -->
+        <div class="stage-card unlocked" onclick="openCardModal()">
+            <div class="stage-header">
+                <span class="stage-number">STAGE 01</span>
+                <span class="stage-badge">CLEARED!</span>
+            </div>
+            <div class="stage-title">Week 1 - 個人數位名片</div>
+        </div>
+
+        <!-- Stage 2 (已解鎖 - 留言板 Modal) -->
+        <div class="stage-card unlocked" onclick="openBoardModal()">
+            <div class="stage-header">
+                <span class="stage-number">STAGE 02</span>
+                <span class="stage-badge">CLEARED!</span>
+            </div>
+            <div class="stage-title">Week 2 - 朋友對我的動態留言板</div>
+        </div>
+
+        <!-- Stage 3 (未解鎖) -->
+        <div class="stage-card locked" onclick="showLockedMessage(3)">
+            <div class="stage-header">
+                <span class="stage-number">STAGE 03</span>
+                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
+            </div>
+            <div class="stage-title">Week 3 - 尚未解鎖</div>
+        </div>
+
+        <!-- Stage 4 (已解鎖！🎉) -->
+        <div class="stage-card unlocked" onclick="showStage4Message()">
+            <div class="stage-header">
+                <span class="stage-number">STAGE 04</span>
+                <span class="stage-badge">CLEARED!</span>
+            </div>
+            <div class="stage-title">Week 4 - 關卡解鎖成功！</div>
+        </div>
+
+        <!-- Stage 5~16 (未解鎖) -->
+        <div class="stage-card locked" onclick="showLockedMessage(5)"><div class="stage-header"><span class="stage-number">STAGE 05</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 5 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(6)"><div class="stage-header"><span class="stage-number">STAGE 06</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 6 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(7)"><div class="stage-header"><span class="stage-number">STAGE 07</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 7 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(8)"><div class="stage-header"><span class="stage-number">STAGE 08</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 8 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(9)"><div class="stage-header"><span class="stage-number">STAGE 09</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 9 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(10)"><div class="stage-header"><span class="stage-number">STAGE 10</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 10 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(11)"><div class="stage-header"><span class="stage-number">STAGE 11</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 11 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(12)"><div class="stage-header"><span class="stage-number">STAGE 12</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 12 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(13)"><div class="stage-header"><span class="stage-number">STAGE 13</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 13 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(14)"><div class="stage-header"><span class="stage-number">STAGE 14</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 14 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(15)"><div class="stage-header"><span class="stage-number">STAGE 15</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 15 - 尚未解鎖</div></div>
+        <div class="stage-card locked" onclick="showLockedMessage(16)"><div class="stage-header"><span class="stage-number">STAGE 16</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 16 - 尚未解鎖</div></div>
+    </div>
+
+    <!-- Modal 1: STAGE 01 名片彈窗 -->
+    <div id="cardModal" class="modal-overlay" onclick="closeModal(event, 'cardModal')">
+        <div class="modal-wrapper">
+            <button class="modal-close-btn" onclick="closeModal(event, 'cardModal', true)">✕</button>
+            <main class="card-container">
+                <div class="avatar-wrapper">
+                    <img src="https://i.postimg.cc/Px1Xb82t/UU.jpg" alt="陳安楀的大頭照" class="avatar-img" onerror="this.src='https://placehold.co/100x100/84a98c/FFF?text=UU'">
+                </div>
+                <h1 class="name">陳安楀</h1>
+                <p class="bio">✨ 來自屏東，活潑開朗，喜歡聽音樂、追劇與打排球！</p>
+                <div class="button-group">
+                    <a href="https://instagram.com" target="_blank" class="btn btn-instagram"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                    <a href="mailto:your-email@example.com" class="btn btn-email"><i class="fa-regular fa-envelope"></i> Email</a>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal 2: STAGE 02 朋友留言板彈窗 -->
+    <div id="boardModal" class="modal-overlay" onclick="closeModal(event, 'boardModal')">
+        <div class="modal-wrapper board-modal-wrapper">
+            <button class="modal-close-btn" onclick="closeModal(event, 'boardModal', true)">✕</button>
+            <div class="board-header">
+                <h2>✉️ 朋友對我的留言板 ✨</h2>
+                <p>歡迎來到我的小天地！這裡紀錄了大家對我的評價與真心話～</p>
+            </div>
+
+            <!-- Loading 奶油動畫 -->
+            <div id="loading">
+                <div class="loader-dots">
+                    <div></div><div></div><div></div>
+                </div>
+                <p style="color: var(--board-primary); font-weight: bold;">讀取留言中...</p>
+            </div>
+
+            <!-- 瀑布流留言牆容器 -->
+            <div id="wall" class="wall-container"></div>
+        </div>
+    </div>
+
+    <!-- Toast 提示彈窗 -->
+    <div id="toast" class="toast">
+        <span>🍪</span>
+        <span id="toast-text">關卡還在烤箱裡烘烤中！</span>
+    </div>
+
+    <script>
+        let toastTimeout;
+        const CONFIG = {
+            csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKGrg6Ww5Upnc44xG3PgmxlmL9GcoreFzwPWoL8Dxdd3dmZNsf6VhyZizrGSmsVyLZ6xVl2zsSWYZ7/pub?output=csv',
+            carouselInterval: 3000
+        };
+
+        let cardsElements = [];
+        let currentIndex = 0;
+        let carouselTimer = null;
+        let isDataFetched = false;
+
+        /* --- Modal 開關控制 --- */
+        function openCardModal() {
+            document.getElementById('cardModal').classList.add('active');
+        }
+
+        function openBoardModal() {
+            document.getElementById('boardModal').classList.add('active');
+            if (!isDataFetched) {
+                fetchComments();
+            } else {
+                startCarousel();
+            }
+        }
+
+        function closeModal(event, modalId, forceClose = false) {
+            if (forceClose || event.target.id === modalId) {
+                document.getElementById(modalId).classList.remove('active');
+                if (modalId === 'boardModal') {
+                    clearInterval(carouselTimer);
+                }
+            }
+        }
+
+        /* --- STAGE 04 點擊回應 --- */
+        function showStage4Message() {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.innerText = `🎉 STAGE 04 已成功解鎖！恭喜你勇士！`;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        /* --- 上鎖提示 --- */
+        function showLockedMessage(weekNum) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.innerText = `STAGE ${weekNum} 餅乾還在烤箱裡烘烤中！敬請期待！`;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        /* --- CSV 留言讀取與解析 --- */
+        async function fetchComments() {
+            try {
+                const response = await fetch(CONFIG.csvUrl);
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+
+                document.getElementById('loading').style.display = 'none';
+                renderCards(data);
+                isDataFetched = true;
+                startCarousel();
+            } catch (error) {
+                console.error('讀取 CSV 失敗:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: #d9534f;">留言讀取失敗，請稍後再試！</p>';
+            }
+        }
+
+        function parseCSV(text) {
+            const lines = [];
+            let row = [];
+            let inQuotes = false;
+            let currentToken = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentToken += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentToken.trim());
+                    currentToken = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++;
+                    row.push(currentToken.trim());
+                    if (row.length > 1 || row[0] !== '') lines.push(row);
+                    row = [];
+                    currentToken = '';
+                } else {
+                    currentToken += char;
+                }
+            }
+            if (currentToken || row.length > 0) {
+                row.push(currentToken.trim());
+                lines.push(row);
+            }
+            if (lines.length > 0) lines.shift();
+
+            return lines.map(item => ({
+                timestamp: item[0] || '',
+                name: item[1] || '匿名朋友',
+                message: item[2] || '（這個人很懶沒有留下內容～）'
+            }));
+        }
+
+        function renderCards(comments) {
+            const wall = document.getElementById('wall');
+            wall.innerHTML = '';
+            if (comments.length === 0) {
+                wall.innerHTML = '<p style="text-align:center; width:100%;">目前還沒有任何留言喔！</p>';
+                return;
+            }
+
+            const icons = ['🌸', '🐱', '🐻', '🍓', '🧸', '🍮', '🐥', '🎀', '🍰'];
+
+            comments.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.classList.add('board-card');
+                const randomIcon = icons[index % icons.length];
+
+                card.innerHTML = `
+                    <div class="board-card-header">
+                        <div class="board-avatar">${randomIcon}</div>
+                        <div class="board-author">${escapeHTML(item.name)}</div>
+                    </div>
+                    <div class="board-content">${escapeHTML(item.message)}</div>
+                    <div class="board-time">${escapeHTML(item.timestamp)}</div>
+                `;
+                wall.appendChild(card);
+            });
+
+            cardsElements = document.querySelectorAll('.board-card');
+        }
+
+        /* --- 留言輪播特效 --- */
+        function startCarousel() {
+            if (cardsElements.length === 0) return;
+            const wall = document.getElementById('wall');
+            wall.classList.add('has-highlight');
+
+            clearInterval(carouselTimer);
+            highlightCard(currentIndex);
+
+            carouselTimer = setInterval(() => {
+                currentIndex = (currentIndex + 1) % cardsElements.length;
+                highlightCard(currentIndex);
+            }, CONFIG.carouselInterval);
+        }
+
+        function highlightCard(index) {
+            cardsElements.forEach(card => card.classList.remove('highlight'));
+            if (cardsElements[index]) {
+                cardsElements[index].classList.add('highlight');
+            }
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
