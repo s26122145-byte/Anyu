@@ -7,7 +7,8 @@
     <!-- 引入可愛圓潤與遊戲感字體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Kiwi+Maru:wght@400;500&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
         /* =========================================================
            1. 薑餅人王國主題色彩與全域變數 (Cookie Run Palette)
@@ -19,11 +20,19 @@
             --ginger-light: #FFC069;      /* 奶油金黃色 */
             --icing-white: #FFFFFF;       /* 糖霜純白 */
             --candy-red: #FF4D6D;         /* 草莓糖漿紅 */
-            --matcha-green: #52B788;      /* 抹茶草地綠 */
-            --crystal-blue: #4EA8DE;      /* 水晶糖果藍 */
+            --matcha-green: #52B788;     /* 抹茶草地綠 */
+            --crystal-blue: #4EA8DE;     /* 水晶糖果藍 */
             --text-cookie: #4A2810;       /* 餅乾主要文字（深焦糖） */
             --border-radius-lg: 24px;
             --border-radius-md: 16px;
+
+            /* 留言板奶油風顏色變數 */
+            --board-bg: #FFFDF7;
+            --board-primary: #E29578;
+            --board-accent: #FFDDD2;
+            --board-sub: #A39391;
+            --highlight-border: #FFB5A7;
+            --highlight-shadow: rgba(255, 181, 167, 0.6);
         }
 
         * {
@@ -129,7 +138,6 @@
             overflow: hidden;
         }
 
-        /* 卡片頂部糖霜邊飾 */
         .profile-card::before {
             content: '';
             position: absolute;
@@ -219,7 +227,6 @@
             margin-bottom: 30px;
         }
 
-        /* 餅乾卡片基礎樣式 */
         .stage-card {
             text-decoration: none;
             display: flex;
@@ -234,7 +241,6 @@
             cursor: pointer;
         }
 
-        /* 解鎖卡片 (美味金黃烤餅乾樣式) */
         .stage-card.unlocked {
             background: linear-gradient(180deg, #FFDD83 0%, #E8A752 100%);
             box-shadow: 0 8px 0 var(--ginger-dark), 0 10px 15px rgba(0,0,0,0.1);
@@ -251,7 +257,6 @@
             box-shadow: 0 4px 0 var(--ginger-dark);
         }
 
-        /* 未解鎖卡片 (未烤熟巧克力餅乾麵糰樣式) */
         .stage-card.locked {
             background: linear-gradient(180deg, #9C8375 0%, #685044 100%);
             border-color: #3D2B22;
@@ -270,7 +275,6 @@
             75% { transform: rotate(3deg); }
         }
 
-        /* 卡片頁首與 Badge */
         .stage-header {
             display: flex;
             justify-content: space-between;
@@ -361,31 +365,237 @@
             opacity: 1;
         }
 
-        /* 響應式佈局適應 */
-        @media (max-width: 860px) {
-            .stage-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        /* =========================================================
+           7. 關卡 4 彈出視窗樣式 (Modal & Board Styles)
+           ========================================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(74, 40, 16, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
         }
 
-        @media (max-width: 480px) {
-            body {
-                padding: 12px 10px 30px;
-            }
-            .stage-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .hud-bar {
-                font-size: 11px;
-                padding: 10px 8px;
-            }
-            .hud-item {
-                padding: 4px 8px;
-            }
-            .player-title {
-                font-size: 16px;
-            }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-container {
+            width: 100%;
+            max-width: 1000px;
+            max-height: 90vh;
+            background-color: var(--board-bg);
+            border: 6px solid var(--ginger-dark);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 16px 0 var(--ginger-dark), 0 20px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        /* 關閉按鈕 */
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--candy-red);
+            color: #FFF;
+            border: 3px solid var(--ginger-dark);
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--ginger-dark);
+            z-index: 10;
+            transition: transform 0.1s;
+        }
+
+        .modal-close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-close-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 0 var(--ginger-dark);
+        }
+
+        .modal-body {
+            padding: 30px 20px;
+            overflow-y: auto;
+            user-select: text; /* 允許留言複製選取 */
+        }
+
+        /* --- 留言板內組件 CSS --- */
+        .board-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .board-header h2 {
+            font-size: 1.8rem;
+            color: var(--board-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .board-header p {
+            font-size: 0.95rem;
+            color: var(--board-sub);
+        }
+
+        #loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+        }
+
+        .loader-dots {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .loader-dots div {
+            width: 18px;
+            height: 18px;
+            background-color: var(--board-primary);
+            border-radius: 50%;
+            animation: bounce 0.6s infinite alternate;
+        }
+
+        .loader-dots div:nth-child(2) {
+            animation-delay: 0.2s;
+            background-color: var(--highlight-border);
+        }
+
+        .loader-dots div:nth-child(3) {
+            animation-delay: 0.4s;
+            background-color: var(--board-accent);
+        }
+
+        @keyframes bounce {
+            to { transform: translateY(-16px) scale(1.1); }
+        }
+
+        #loading p {
+            font-size: 1.1rem;
+            color: var(--board-primary);
+            font-weight: bold;
+        }
+
+        .wall-container {
+            width: 100%;
+            column-count: 3;
+            column-gap: 20px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 860px) {
+            .wall-container { column-count: 2; }
+            .stage-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 550px) {
+            .wall-container { column-count: 1; }
+            body { padding: 12px 10px 30px; }
+            .stage-grid { grid-template-columns: 1fr; gap: 14px; }
+            .hud-bar { font-size: 11px; padding: 10px 8px; }
+            .hud-item { padding: 4px 8px; }
+            .player-title { font-size: 16px; }
+        }
+
+        .card {
+            background-color: #FFFFFF;
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            break-inside: avoid;
+            border: 2px solid #F7F0E6;
+            box-shadow: 0 8px 20px rgba(226, 149, 120, 0.08);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .avatar-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--board-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text-cookie);
+        }
+
+        .card-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-cookie);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .card-time {
+            margin-top: 14px;
+            font-size: 0.75rem;
+            color: var(--board-sub);
+            text-align: right;
+        }
+
+        /* 輪播高亮與遮罩 */
+        .card.highlight {
+            transform: scale(1.05);
+            border-color: var(--highlight-border);
+            box-shadow: 0 12px 30px var(--highlight-shadow);
+            opacity: 1 !important;
+            filter: blur(0px) !important;
+            z-index: 10;
+        }
+
+        .wall-container.has-highlight .card:not(.highlight) {
+            opacity: 0.45;
+            filter: blur(1.5px);
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -418,7 +628,7 @@
             <span class="hud-icon">🏆</span>
             <div>
                 <div class="hud-label">CLEAR</div>
-                <div class="hud-value">02/16</div>
+                <div class="hud-value">03/16</div>
             </div>
         </div>
     </div>
@@ -426,7 +636,6 @@
     <!-- 餅乾勇士個人資料卡 -->
     <div class="profile-card">
         <div class="avatar-container">
-            <!-- 薑餅人風格預設大頭貼 -->
             <img class="avatar-img" src="https://placehold.co/100x100/FFC069/8B4513?text=COOKIE" alt="Cookie Hero Avatar" onerror="this.src='https://placehold.co/100x100/8B4513/FFF?text=COOKIE'">
         </div>
         <div>
@@ -472,123 +681,28 @@
             <div class="stage-title">Week 3 - 尚未解鎖</div>
         </a>
 
-        <!-- Stage 4 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(4)">
+        <!-- Stage 4 (Unlocked - 開啟彈窗留言板) -->
+        <a href="javascript:void(0)" class="stage-card unlocked" onclick="openBoardModal()">
             <div class="stage-header">
                 <span class="stage-number">STAGE 04</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
+                <span class="stage-badge">CLEARED!</span>
             </div>
-            <div class="stage-title">Week 4 - 尚未解鎖</div>
+            <div class="stage-title">Week 4 - 朋友對我的動態留言板</div>
         </a>
 
-        <!-- Stage 5 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(5)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 05</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 5 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 6 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(6)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 06</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 6 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 7 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(7)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 07</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 7 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 8 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(8)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 08</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 8 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 9 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(9)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 09</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 9 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 10 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(10)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 10</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 10 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 11 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(11)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 11</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 11 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 12 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(12)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 12</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 12 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 13 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(13)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 13</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 13 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 14 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(14)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 14</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 14 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 15 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(15)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 15</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 15 - 尚未解鎖</div>
-        </a>
-
-        <!-- Stage 16 (Locked) -->
-        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(16)">
-            <div class="stage-header">
-                <span class="stage-number">STAGE 16</span>
-                <span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span>
-            </div>
-            <div class="stage-title">Week 16 - 尚未解鎖</div>
-        </a>
-
+        <!-- Stage 5 ~ 16 (Locked) -->
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(5)"><div class="stage-header"><span class="stage-number">STAGE 05</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 5 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(6)"><div class="stage-header"><span class="stage-number">STAGE 06</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 6 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(7)"><div class="stage-header"><span class="stage-number">STAGE 07</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 7 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(8)"><div class="stage-header"><span class="stage-number">STAGE 08</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 8 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(9)"><div class="stage-header"><span class="stage-number">STAGE 09</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 9 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(10)"><div class="stage-header"><span class="stage-number">STAGE 10</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 10 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(11)"><div class="stage-header"><span class="stage-number">STAGE 11</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 11 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(12)"><div class="stage-header"><span class="stage-number">STAGE 12</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 12 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(13)"><div class="stage-header"><span class="stage-number">STAGE 13</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 13 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(14)"><div class="stage-header"><span class="stage-number">STAGE 14</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 14 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(15)"><div class="stage-header"><span class="stage-number">STAGE 15</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 15 - 尚未解鎖</div></a>
+        <a href="javascript:void(0)" class="stage-card locked" onclick="showLockedMessage(16)"><div class="stage-header"><span class="stage-number">STAGE 16</span><span class="stage-badge"><span class="lock-icon">🔒</span>BAKING...</span></div><div class="stage-title">Week 16 - 尚未解鎖</div></a>
     </div>
 
     <!-- 上鎖關卡提示浮動 Toast -->
@@ -597,10 +711,37 @@
         <span id="toast-text">關卡還在烤箱裡烘烤中！</span>
     </div>
 
+    <!-- 關卡 4 留言板 彈出視窗 (Modal) -->
+    <div id="board-modal" class="modal-overlay" onclick="closeBoardModal(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeBoardModal(event)">✕</button>
+            
+            <div class="modal-body">
+                <div class="board-header">
+                    <h2><span>✉️</span> 朋友對我的留言板 <span>✨</span></h2>
+                    <p>歡迎來到我的小天地！這裡紀錄了大家對我的評價與真心話～</p>
+                </div>
+
+                <div id="loading">
+                    <div class="loader-dots">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <p>讀取留言中...</p>
+                </div>
+
+                <div id="wall" class="wall-container"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        /* =========================================================
+           1. Toast 與 Modal 開關控制
+           ========================================================= */
         let toastTimeout;
 
-        // 觸發薑餅人風格 Toast 提示
         function showLockedMessage(weekNum) {
             const toast = document.getElementById('toast');
             const toastText = document.getElementById('toast-text');
@@ -612,6 +753,171 @@
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
             }, 2500);
+        }
+
+        let isBoardLoaded = false;
+
+        function openBoardModal() {
+            document.getElementById('board-modal').classList.add('active');
+            // 只在第一次開啟時讀取 CSV 資料
+            if (!isBoardLoaded) {
+                fetchComments();
+                isBoardLoaded = true;
+            } else {
+                startCarousel();
+            }
+        }
+
+        function closeBoardModal(e) {
+            document.getElementById('board-modal').classList.remove('active');
+            stopCarousel();
+        }
+
+        /* =========================================================
+           2. 留言板動態資料抓取 (Fetch & Parse & Carousel)
+           ========================================================= */
+        const CONFIG = {
+            csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKGrg6Ww5Upnc44xG3PgmxlmL9GcoreFzwPWoL8Dxdd3dmZNsf6VhyZizrGSmsVyLZ6xVl2zsSWYZ7/pub?output=csv',
+            carouselInterval: 3000
+        };
+
+        let cardsElements = [];
+        let currentIndex = 0;
+        let carouselTimer = null;
+
+        async function fetchComments() {
+            try {
+                const response = await fetch(CONFIG.csvUrl);
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+
+                document.getElementById('loading').style.display = 'none';
+                renderCards(data);
+                startCarousel();
+
+            } catch (error) {
+                console.error('讀取 CSV 失敗:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: #FF4D6D;">留言讀取失敗，請稍後再試！</p>';
+            }
+        }
+
+        function parseCSV(text) {
+            const lines = [];
+            let row = [];
+            let inQuotes = false;
+            let currentToken = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentToken += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentToken.trim());
+                    currentToken = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++;
+                    row.push(currentToken.trim());
+                    if (row.length > 1 || row[0] !== '') lines.push(row);
+                    row = [];
+                    currentToken = '';
+                } else {
+                    currentToken += char;
+                }
+            }
+            if (currentToken || row.length > 0) {
+                row.push(currentToken.trim());
+                lines.push(row);
+            }
+
+            if (lines.length > 0) lines.shift();
+
+            return lines.map(item => ({
+                timestamp: item[0] || '',
+                name: item[1] || '匿名朋友',
+                message: item[2] || '（這個人很懶沒有留下內容～）'
+            }));
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        function renderCards(comments) {
+            const wall = document.getElementById('wall');
+            wall.innerHTML = '';
+
+            if (comments.length === 0) {
+                wall.innerHTML = '<p style="text-align:center; width:100%;">目前還沒有任何留言喔！</p>';
+                return;
+            }
+
+            const icons = ['🌸', '🐱', '🐻', '🍓', '🧸', '🍮', '🐥', '🎀', '🍰'];
+
+            comments.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                const randomIcon = icons[index % icons.length];
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="avatar-icon">${randomIcon}</div>
+                        <div class="author-name">${escapeHTML(item.name)}</div>
+                    </div>
+                    <div class="card-content">${escapeHTML(item.message)}</div>
+                    <div class="card-time">${escapeHTML(item.timestamp)}</div>
+                `;
+
+                wall.appendChild(card);
+            });
+
+            cardsElements = document.querySelectorAll('.card');
+        }
+
+        function startCarousel() {
+            if (cardsElements.length === 0) return;
+            const wall = document.getElementById('wall');
+            wall.classList.add('has-highlight');
+
+            highlightCard(currentIndex);
+
+            stopCarousel();
+            carouselTimer = setInterval(() => {
+                currentIndex = (currentIndex + 1) % cardsElements.length;
+                highlightCard(currentIndex);
+            }, CONFIG.carouselInterval);
+        }
+
+        function stopCarousel() {
+            if (carouselTimer) {
+                clearInterval(carouselTimer);
+                carouselTimer = null;
+            }
+        }
+
+        function highlightCard(index) {
+            cardsElements.forEach((card, i) => {
+                if (i === index) {
+                    card.classList.add('highlight');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    card.classList.remove('highlight');
+                }
+            });
         }
     </script>
 </body>
